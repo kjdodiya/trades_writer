@@ -24,19 +24,30 @@ class TradeCardReader():
         customfields = self.db.customFields
         all_fields = list(customfields.find({},{"_id":1, "name":1}))
         self.customfields = { field["_id"]: field["name"] for field in all_fields }
-        print (self.customfields)
 
     def load_locations(self):
         """
         Load Locations
         """
-        customfields = self.db.customFields
-        location_items = customfields.find_one({"name":"E Location"},{"settings.dropdownItems":1})
-        raw_locations = location_items["settings"]["dropdownItems"]
-        for raw_location in raw_locations:
-            self.locations[raw_location["_id"]] = raw_location["name"]
-
-        print (self.locations)
+        try:            
+            customfields = self.db.customFields
+            location_items = customfields.find_one({"name":"E Location"},{"settings.dropdownItems":1})
+            raw_locations = location_items["settings"]["dropdownItems"]
+            for raw_location in raw_locations:
+                self.locations[raw_location["_id"]] = raw_location["name"]
+            no_of_locations = len(self.locations)
+            if no_of_locations > 0:
+                print ("Location load Successful : {} locations loaded".format(len(self.locations)))
+            elif no_of_locations == 0:
+                print ("Location load successful : There are no locations")
+            else:
+                print ("Error loading locations")
+        except KeyError as ke:
+            print ("One or more Key could not be found. Check MongoDB")
+            print ("Could not load locations")
+        except Exception as ex:
+            print (ex)
+            print ("Could not load locations")
 
 
     def get_trades_for_board(self,board_slug):
