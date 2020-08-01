@@ -161,7 +161,7 @@ class TradeCardReader():
                 raw_trades.append(raw_trade)
 
         trades = []
-        for raw_trade in raw_trades[:5]:
+        for raw_trade in raw_trades:
             trade = { csv_field: raw_trade[card_field] for (csv_field,card_field) in self.csv_card_mappping.items() if card_field != '' }
             # Replace level 2 mapping
             trade['Location'] = self.locations[trade['Location']] if trade['Location'] else ''
