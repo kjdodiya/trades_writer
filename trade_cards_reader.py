@@ -25,6 +25,18 @@ class TradeCardReader():
         all_fields = list(customfields.find({},{"_id":1, "name":1}))
         self.customfields = { field["_id"]: field["name"] for field in all_fields }
 
+    def __map_id_val(self,data,value_key):
+        mapped_data = {}
+        mapped_data = { field["_id"]: field[value_key] for field in data }
+        return mapped_data
+
+    def __load_dropdown_items(self, field_name):
+        field_items = {}
+        customfields = self.db.customFields
+        dropdown_items = customfields.find_one({"name": field_name},{"settings.dropdownItems":1})
+        field_items = dropdown_items["settings"]["dropdownItems"]
+        return field_items
+
     def load_locations(self):
         """
         Load Locations
@@ -33,8 +45,7 @@ class TradeCardReader():
             customfields = self.db.customFields
             location_items = customfields.find_one({"name":"E Location"},{"settings.dropdownItems":1})
             raw_locations = location_items["settings"]["dropdownItems"]
-            for raw_location in raw_locations:
-                self.locations[raw_location["_id"]] = raw_location["name"]
+            self.locations = self.__map_id_val(raw_locations,"name")
             no_of_locations = len(self.locations)
             if no_of_locations > 0:
                 print ("Location load Successful : {} locations loaded".format(len(self.locations)))
@@ -49,6 +60,72 @@ class TradeCardReader():
             print (ex)
             print ("Could not load locations")
 
+    def load_transaction_type(self):
+        """
+        Load Transaction Type
+        """
+        field_name = "Transcation Type"
+        try:            
+            raw_items = self.__load_dropdown_items("C Transaction Type")
+            self.txn_types = self.__map_id_val(raw_items,"name")
+            no_of_items = len(self.txn_types)
+            if no_of_items > 0:
+                print ("{} load Successful : {} {} loaded".format(field_name, no_of_items, field_name))
+            elif no_of_items == 0:
+                print ("{} load successful : There are no {}".format(field_name, field_name))
+            else:
+                print ("Error loading {}".format(field_name))
+        except KeyError as ke:
+            print ("One or more Key could not be found. Check MongoDB")
+            print ("Could not load {}".format(field_name))
+        except Exception as ex:
+            print (ex)
+            print ("Could not load {}".format(field_name))
+            
+    def load_order_type(self):
+        """
+        Load Order Type
+        """
+        field_name = "Order Type"
+        try:            
+            raw_items = self.__load_dropdown_items("D Order Type")
+            self.order_types = self.__map_id_val(raw_items,"name")
+            no_of_items = len(self.order_types)
+            if no_of_items > 0:
+                print ("{} load Successful : {} {} loaded".format(field_name, no_of_items, field_name))
+            elif no_of_items == 0:
+                print ("{} load successful : There are no {}".format(field_name, field_name))
+            else:
+                print ("Error loading {}".format(field_name))
+        except KeyError as ke:
+            print ("One or more Key could not be found. Check MongoDB")
+            print ("Could not load {}".format(field_name))
+        except Exception as ex:
+            print (ex)
+            print ("Could not load {}".format(field_name))
+
+
+    def load_pricing_options(self):
+        """
+        Load Pricing Options
+        """
+        field_name = "Pricing Option"
+        try:            
+            raw_items = self.__load_dropdown_items("F Pricing Option")
+            self.order_types = self.__map_id_val(raw_items,"name")
+            no_of_items = len(self.order_types)
+            if no_of_items > 0:
+                print ("{} load Successful : {} {} loaded".format(field_name, no_of_items, field_name))
+            elif no_of_items == 0:
+                print ("{} load successful : There are no {}".format(field_name, field_name))
+            else:
+                print ("Error loading {}".format(field_name))
+        except KeyError as ke:
+            print ("One or more Key could not be found. Check MongoDB")
+            print ("Could not load {}".format(field_name))
+        except Exception as ex:
+            print (ex)
+            print ("Could not load {}".format(field_name))
 
     def get_trades_for_board(self,board_slug):
         board_id = self.db['boards'].find_one({"slug":board_slug})["_id"]
@@ -80,4 +157,7 @@ if __name__ ==  "__main__":
     tcr.load_level1_custom_fields()
     tcr.get_trades_for_board("gpm-trades")
     tcr.load_locations()
+    tcr.load_transaction_type()
+    tcr.load_order_type()
+    tcr.load_pricing_options()
     # tcr.export_trades('trades_sample_4.csv')
