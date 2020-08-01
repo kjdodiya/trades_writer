@@ -146,33 +146,42 @@ class TradeCardReader():
         cards = self.db['cards'].find({"boardId":self.board_id})
         raw_trades = []
         for card in cards:
-            raw_trade = {}
-            match_result = self.pattern.match(card['title'])
-            if match_result:
-                matched_dict = match_result.groupdict()
-                raw_trade['Client'] = matched_dict['client']
-                raw_trade['Metal'] = matched_dict['metal']
-                for field in card['customFields']:                
-                    try:
-                        raw_trade[self.customfields[field["_id"]]] = field["value"]
-                    except KeyError as ke:
-                        raw_trade[self.customfields[field["_id"]]] = ""
-                raw_trade['client'] = matched_dict['client']
-                raw_trades.append(raw_trade)
-
+            try:
+                raw_trade = {}
+                match_result = self.pattern.match(card['title'])
+                if match_result:
+                    for field in card['customFields']:                
+                        try:
+                            raw_trade[self.customfields[field["_id"]]] = field["value"]
+                        except KeyError as ke:
+                            raw_trade[self.customfields[field["_id"]]] = ""
+                    matched_dict = match_result.groupdict()
+                    raw_trade['Client'] = matched_dict['client']
+                    raw_trade['Metal'] = matched_dict['metal']
+                    raw_trades.append(raw_trade)
+            except KeyError as ke:
+                print (ke)
+            except:
+                pass
+        no_of_raw_trade = len(raw_trades)
+        print ("Total {} raw trades found".format(no_of_raw_trade))
         trades = []
         for raw_trade in raw_trades:
-            trade = { csv_field: raw_trade[card_field] for (csv_field,card_field) in self.csv_card_mappping.items() if card_field != '' }
-            # Replace level 2 mapping
-            trade['Location'] = self.locations[trade['Location']] if trade['Location'] else ''
-            trade['Transaction Type'] = self.txn_types[trade['Transaction Type']] if trade['Transaction Type'] else ''
-            trade['Order Type'] = self.order_types[trade['Order Type']] if trade['Order Type'] else '' 
-            trades.append(trade)
+            try:
+                trade = { csv_field: raw_trade[card_field] for (csv_field,card_field) in self.csv_card_mappping.items() if card_field != '' }
+                # Replace level 2 mapping
+                trade['Location'] = self.locations[trade['Location']] if trade['Location'] else ''
+                trade['Transaction Type'] = self.txn_types[trade['Transaction Type']] if trade['Transaction Type'] else ''
+                trade['Order Type'] = self.order_types[trade['Order Type']] if trade['Order Type'] else '' 
+                trades.append(trade)
+            except KeyError as ke:
+                print (ke)
+            except:
+                pass
         self.trades = trades
 
 
     def export_trades(self, ofile):
-        print (self.trades)
         keys = self.trades[0].keys()
         print(keys)
         with open(ofile, 'w') as trades_csv:
