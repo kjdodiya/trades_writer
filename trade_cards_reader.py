@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 import csv
-
+import re
 
 class TradeCardReader():
     def __init__(self):
@@ -13,9 +13,22 @@ class TradeCardReader():
         self.board_id = None
         self.trades = []
         self.locations = {}
+        self.pattern = re.compile("(?P<client>\d+)\s-\s(?P<otype>.*)\s(?P<metal>.*)")
         self.fieldnames = ["A Trade Date", "E Location", "C Transaction Type", "D Order Type", "H Bars Composition", "G Transaction Premium (%)", "I Referral", "F Pricing Option", "J Remarks", "B Delivery Date"]
         self.csv_header = ["Trade Date", " Location", " Transaction Type", " Order Type", " Order Detail", " Premium (%)", " Referral", " Pricing Method", " Remarks", "Delivery Date"]
-    
+        self.csv_card_mappping = { 	
+           	            "Trade Date" : "A Trade Date", \
+        	            "Client Number" : "Client", \
+                    	    "Location" : "E Location",  \
+	                    "Transaction Type" : "C Transaction Type", \
+                            "Metal": "Metal", \
+	                    "Order Type" : "D Order Type", \
+	                    "Order Detail" : "H Bars Composition", \
+	                    "Premium (%)" : "G Transaction Premium (%)", \
+	                    "Referral" : "I Referral", \
+    	                    "Pricing Method" : "F Pricing Option", \
+	                    "Remarks+" : "J Remarks"
+                            }   
 
     def load_level1_custom_fields(self):
         """
@@ -112,7 +125,7 @@ class TradeCardReader():
         field_name = "Pricing Option"
         try:            
             raw_items = self.__load_dropdown_items("F Pricing Option")
-            self.order_types = self.__map_id_val(raw_items,"name")
+            self.pricing_options = self.__map_id_val(raw_items,"name")
             no_of_items = len(self.order_types)
             if no_of_items > 0:
                 print ("{} load Successful : {} {} loaded".format(field_name, no_of_items, field_name))
@@ -131,22 +144,39 @@ class TradeCardReader():
         board_id = self.db['boards'].find_one({"slug":board_slug})["_id"]
         self.board_id = board_id
         cards = self.db['cards'].find({"boardId":self.board_id})
-        trades = []
+        raw_trades = []
         for card in cards:
-            trade = {}
-            for field in card['customFields']:                
-                try:
-                    trade[self.customfields[field["_id"]]] = field["value"]
-                except KeyError as ke:
-                    trade[self.customfields[field["_id"]]] = ""
+            raw_trade = {}
+            match_result = self.pattern.match(card['title'])
+            if match_result:
+                matched_dict = match_result.groupdict()
+                raw_trade['Client'] = matched_dict['client']
+                raw_trade['Metal'] = matched_dict['metal']
+                for field in card['customFields']:                
+                    try:
+                        raw_trade[self.customfields[field["_id"]]] = field["value"]
+                    except KeyError as ke:
+                        raw_trade[self.customfields[field["_id"]]] = ""
+                raw_trade['client'] = matched_dict['client']
+                raw_trades.append(raw_trade)
+
+        trades = []
+        for raw_trade in raw_trades[:5]:
+            trade = { csv_field: raw_trade[card_field] for (csv_field,card_field) in self.csv_card_mappping.items() if card_field != '' }
+            # Replace level 2 mapping
+            trade['Location'] = self.locations[trade['Location']] if trade['Location'] else ''
+            trade['Transaction Type'] = self.txn_types[trade['Transaction Type']] if trade['Transaction Type'] else ''
+            trade['Order Type'] = self.order_types[trade['Order Type']] if trade['Order Type'] else '' 
             trades.append(trade)
-        self.trades = trades[:1]
+        self.trades = trades
+
 
     def export_trades(self, ofile):
+        print (self.trades)
         keys = self.trades[0].keys()
         print(keys)
         with open(ofile, 'w') as trades_csv:
-            trades_csv_writer = csv.DictWriter(trades_csv,self.fieldnames)
+            trades_csv_writer = csv.DictWriter(trades_csv, keys)
             trades_csv_writer.writeheader()
             trades_csv_writer.writerows(self.trades)
         print ("Trades exported to CSV in file {}".format(ofile))
@@ -155,9 +185,9 @@ class TradeCardReader():
 if __name__ ==  "__main__":
     tcr = TradeCardReader()
     tcr.load_level1_custom_fields()
-    tcr.get_trades_for_board("gpm-trades")
     tcr.load_locations()
     tcr.load_transaction_type()
     tcr.load_order_type()
     tcr.load_pricing_options()
-    # tcr.export_trades('trades_sample_4.csv')
+    tcr.get_trades_for_board("gpm-trades")
+    tcr.export_trades('trades_sample_4.csv')
