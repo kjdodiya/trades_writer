@@ -172,7 +172,7 @@ class TradeCardReader:
         try:
             raw_items = self.__load_dropdown_items("F Pricing Option")
             self.pricing_options = self.__map_id_val(raw_items, "name")
-            no_of_items = len(self.order_types)
+            no_of_items = len(self.pricing_options)
             if no_of_items > 0:
                 print(
                     "{} load Successful : {} {} loaded".format(
@@ -264,4 +264,4 @@ if __name__ == "__main__":
     tcr.load_order_type()
     tcr.load_pricing_options()
     tcr.get_trades_for_board("gpm-trades")
-    tcr.export_trades("trades_sample_4.csv")
+    tcr.export_trades("gpm-trades.csv")
