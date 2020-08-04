@@ -44,7 +44,7 @@ class TradeCardReader:
             "Client Number": "Client",
             "Location": "E Location",
             "Transaction Type": "C Transaction Type",
-            "Metal": "Metal",
+            "Metal": "L Metal",
             "Order Type": "D Order Type",
             "Order Detail": "H Bars Composition",
             "Premium (%)": "G Transaction Premium (%)",
@@ -194,6 +194,36 @@ class TradeCardReader:
             print(ex)
             print("Could not load {}".format(field_name))
 
+    def load_metal_types(self):
+        """
+        Load Metal type
+        """
+        field_name = "Metal"
+        try:
+            raw_items = self.__load_dropdown_items("L Metal")
+            self.metal_types = self.__map_id_val(raw_items, "name")
+            no_of_items = len(self.metal_types)
+            if no_of_items > 0:
+                print(
+                    "{} load Successful : {} {} loaded".format(
+                        field_name, no_of_items, field_name
+                    )
+                )
+                print (self.metal_types)
+            elif no_of_items == 0:
+                print(
+                    "{} load successful : There are no {}".format(
+                        field_name, field_name
+                    )
+                )
+            else:
+                print("Error loading {}".format(field_name))
+        except KeyError as ke:
+            print("One or more Key could not be found. Check MongoDB")
+            print("Could not load {}".format(field_name))
+        except Exception as ex:
+            print("Error loading {}".format(field_name))
+
     def get_trades_for_board(self, board_slug):
         board_id = self.db["boards"].find_one({"slug": board_slug})["_id"]
         self.board_id = board_id
@@ -211,10 +241,11 @@ class TradeCardReader:
                             raw_trade[self.customfields[field["_id"]]] = ""
                     matched_dict = match_result.groupdict()
                     raw_trade["Client"] = matched_dict["client"]
-                    raw_trade["Metal"] = matched_dict["metal"]
+                    # raw_trade["Metal"] = matched_dict[""]
                     raw_trades.append(raw_trade)
             except KeyError as ke:
-                print(ke)
+                pass
+                # print(ke)
             except:
                 pass
         no_of_raw_trade = len(raw_trades)
@@ -239,9 +270,14 @@ class TradeCardReader:
                 trade["Order Type"] = (
                     self.order_types[trade["Order Type"]] if trade["Order Type"] else ""
                 )
+                trade["Metal"] = (
+                    self.metal_types[trade["Metal"]] if trade["Metal"] else ""
+                )
+
                 trades.append(trade)
             except KeyError as ke:
-                print(ke)
+                pass
+                #print(ke)
             except:
                 pass
         self.trades = trades
@@ -263,5 +299,6 @@ if __name__ == "__main__":
     tcr.load_transaction_type()
     tcr.load_order_type()
     tcr.load_pricing_options()
-    tcr.get_trades_for_board("gpm-trades")
+    tcr.load_metal_types()
+    tcr.get_trades_for_board("gpm-trades-2020")
     tcr.export_trades("gpm-trades.csv")
