@@ -4,16 +4,17 @@ import re
 
 
 class TradeCardReader:
-    def __init__(self):
+    def __init__(self, board_slug):
         self.mongo_host = "localhost"
         self.mongo_port = 27019
         self.db_name = "wekan"
         self.client = MongoClient(self.mongo_host, self.mongo_port)
         self.db = self.client[self.db_name]
         self.customfields = {}
-        self.board_id = None
         self.trades = []
         self.locations = {}
+        board_id = self.db["boards"].find_one({"slug": board_slug})["_id"]
+        self.board_id = board_id
         self.pattern = re.compile("(?P<client>\d+)\s-\s(?P<otype>.*)\s(?P<metal>.*)")
         self.fieldnames = [
             "A Trade Date",
@@ -224,9 +225,7 @@ class TradeCardReader:
         except Exception as ex:
             print("Error loading {}".format(field_name))
 
-    def get_trades_for_board(self, board_slug):
-        board_id = self.db["boards"].find_one({"slug": board_slug})["_id"]
-        self.board_id = board_id
+    def get_trades_for_board(self):
         cards = self.db["cards"].find({"boardId": self.board_id})
         raw_trades = []
         for card in cards:
@@ -298,12 +297,12 @@ class TradeCardReader:
 
 
 if __name__ == "__main__":
-    tcr = TradeCardReader()
+    tcr = TradeCardReader("gpm-trades-2020")
     tcr.load_level1_custom_fields()
     tcr.load_locations()
     tcr.load_transaction_type()
     tcr.load_order_type()
     tcr.load_pricing_options()
     tcr.load_metal_types()
-    tcr.get_trades_for_board("gpm-trades-2020")
-    tcr.export_trades("gpm-trades.csv")
+    tcr.get_trades_for_board()
+    tcr.export_trades("gpm-trades-2020.csv")
