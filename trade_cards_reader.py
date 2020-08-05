@@ -29,14 +29,14 @@ class TradeCardReader:
         ]
         self.csv_header = [
             "Trade Date",
-            " Location",
-            " Transaction Type",
-            " Order Type",
-            " Order Detail",
-            " Premium (%)",
-            " Referral",
-            " Pricing Method",
-            " Remarks",
+            "Location",
+            "Transaction Type",
+            "Order Type",
+            "Order Detail",
+            "Premium (%)",
+            "Referral",
+            "Pricing Method",
+            "Remarks",
             "Delivery Date",
         ]
         self.csv_card_mappping = {
@@ -209,7 +209,7 @@ class TradeCardReader:
                         field_name, no_of_items, field_name
                     )
                 )
-                print (self.metal_types)
+                print(self.metal_types)
             elif no_of_items == 0:
                 print(
                     "{} load successful : There are no {}".format(
@@ -270,6 +270,11 @@ class TradeCardReader:
                 trade["Order Type"] = (
                     self.order_types[trade["Order Type"]] if trade["Order Type"] else ""
                 )
+                trade["Pricing Method"] = (
+                    self.pricing_options[trade["Pricing Method"]]
+                    if trade["Pricing Method"]
+                    else ""
+                )
                 trade["Metal"] = (
                     self.metal_types[trade["Metal"]] if trade["Metal"] else ""
                 )
@@ -277,7 +282,7 @@ class TradeCardReader:
                 trades.append(trade)
             except KeyError as ke:
                 pass
-                #print(ke)
+                # print(ke)
             except:
                 pass
         self.trades = trades
