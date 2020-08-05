@@ -225,6 +225,36 @@ class TradeCardReader:
         except Exception as ex:
             print("Error loading {}".format(field_name))
 
+    def load_labels(self):
+        """
+        Load Labels for a Board
+        """
+        field_name = "Labels"
+        try:
+            board = self.db.boards.find_one({"_id": self.board_id})
+            raw_items = board["labels"]
+            self.labels = self.__map_id_val(raw_items, "name")
+            no_of_items = len(self.labels)
+            if no_of_items > 0:
+                print(
+                    "{} load Successful : {} {} loaded".format(
+                        field_name, no_of_items, field_name
+                    )
+                )
+            elif no_of_items == 0:
+                print(
+                    "{} load successful : There are no {}".format(
+                        field_name, field_name
+                    )
+                )
+            else:
+                print("Error loading {}".format(field_name))
+        except KeyError as ke:
+            print("One or more Key could not be found. Check MongoDB")
+            print("Could not load {}".format(field_name))
+        except Exception as ex:
+            print("Error loading {}".format(field_name))
+
     def get_trades_for_board(self):
         cards = self.db["cards"].find({"boardId": self.board_id})
         raw_trades = []
@@ -277,7 +307,6 @@ class TradeCardReader:
                 trade["Metal"] = (
                     self.metal_types[trade["Metal"]] if trade["Metal"] else ""
                 )
-
                 trades.append(trade)
             except KeyError as ke:
                 pass
@@ -304,5 +333,6 @@ if __name__ == "__main__":
     tcr.load_order_type()
     tcr.load_pricing_options()
     tcr.load_metal_types()
+    tcr.load_labels()
     tcr.get_trades_for_board()
     tcr.export_trades("gpm-trades-2020.csv")
