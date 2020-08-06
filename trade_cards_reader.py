@@ -312,6 +312,12 @@ class TradeCardReader:
                 trade["Metal"] = (
                     self.metal_types[trade["Metal"]] if trade["Metal"] else ""
                 )
+                # Formatting
+                trade["Trade Date"] = (
+                    trade["Trade Date"].strftime("%d-%m-%Y")
+                    if trade["Trade Date"]
+                    else ""
+                )
                 card_labels = [self.labels[lid] for lid in trade["Labels"]]
                 csv_labels = " | "
                 csv_labels = csv_labels.join(card_labels)
