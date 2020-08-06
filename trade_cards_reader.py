@@ -52,6 +52,7 @@ class TradeCardReader:
             "Referral": "I Referral",
             "Pricing Method": "F Pricing Option",
             "Remarks+": "J Remarks",
+            "Labels": "labelIds",
         }
 
     def load_level1_custom_fields(self):
@@ -268,6 +269,10 @@ class TradeCardReader:
                             raw_trade[self.customfields[field["_id"]]] = field["value"]
                         except KeyError as ke:
                             raw_trade[self.customfields[field["_id"]]] = ""
+                    try:
+                        raw_trade["labelIds"] = card["labelIds"]
+                    except KeyError as ke:
+                        raw_trade["labelIds"] = []
                     matched_dict = match_result.groupdict()
                     raw_trade["Client"] = matched_dict["client"]
                     # raw_trade["Metal"] = matched_dict[""]
@@ -307,6 +312,10 @@ class TradeCardReader:
                 trade["Metal"] = (
                     self.metal_types[trade["Metal"]] if trade["Metal"] else ""
                 )
+                card_labels = [self.labels[lid] for lid in trade["Labels"]]
+                csv_labels = " | "
+                csv_labels = csv_labels.join(card_labels)
+                trade["Labels"] = csv_labels
                 trades.append(trade)
             except KeyError as ke:
                 pass
@@ -317,7 +326,6 @@ class TradeCardReader:
 
     def export_trades(self, ofile):
         keys = self.trades[0].keys()
-        print(keys)
         with open(ofile, "w") as trades_csv:
             trades_csv_writer = csv.DictWriter(trades_csv, keys)
             trades_csv_writer.writeheader()
