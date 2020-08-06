@@ -43,6 +43,7 @@ class TradeCardReader:
         self.csv_card_mappping = {
             "Trade Date": "A Trade Date",
             "Client Number": "Client",
+            "Document No": "M Document No.",
             "Location": "E Location",
             "Transaction Type": "C Transaction Type",
             "Metal": "L Metal",
@@ -275,7 +276,6 @@ class TradeCardReader:
                         raw_trade["labelIds"] = []
                     matched_dict = match_result.groupdict()
                     raw_trade["Client"] = matched_dict["client"]
-                    # raw_trade["Metal"] = matched_dict[""]
                     raw_trades.append(raw_trade)
             except KeyError as ke:
                 pass
