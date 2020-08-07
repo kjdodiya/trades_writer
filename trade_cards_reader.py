@@ -257,6 +257,38 @@ class TradeCardReader:
         except Exception as ex:
             print("Error loading {}".format(field_name))
 
+    def load_lists(self):
+        """
+        Load Lists in the board
+        """
+        field_name = "Board Lists"
+        try:
+            raw_items = self.db.lists.find({"boardId": self.board_id})
+            self.board_lists = self.__map_id_val(raw_items, "title")
+            no_of_items = len(self.board_lists)
+            if no_of_items > 0:
+                print(
+                    "{} load Successful : {} {} loaded".format(
+                        field_name, no_of_items, field_name
+                    )
+                )
+            elif no_of_items == 0:
+                print(
+                    "{} load successful : There are no {}".format(
+                        field_name, field_name
+                    )
+                )
+            else:
+                print("Error loading {}".format(field_name))
+        except KeyError as ke:
+            print("One or more Key could not be found. Check MongoDB")
+            print("Could not load {}".format(field_name))
+        except Exception as ex:
+            print("Error loading {}".format(field_name))
+        print(self.board_lists)
+
+        print(moved_cards[:4])
+
     def get_trades_for_board(self):
         cards = self.db["cards"].find({"boardId": self.board_id})
         raw_trades = []
@@ -279,7 +311,6 @@ class TradeCardReader:
                     raw_trades.append(raw_trade)
             except KeyError as ke:
                 pass
-                # print(ke)
             except:
                 pass
         no_of_raw_trade = len(raw_trades)
@@ -341,6 +372,7 @@ class TradeCardReader:
 
 if __name__ == "__main__":
     tcr = TradeCardReader("gpm-trades-2020")
+    tcr.load_lists()
     tcr.load_level1_custom_fields()
     tcr.load_locations()
     tcr.load_transaction_type()
