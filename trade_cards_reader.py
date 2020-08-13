@@ -15,7 +15,7 @@ class TradeCardReader:
         self.locations = {}
         board_id = self.db["boards"].find_one({"slug": board_slug})["_id"]
         self.board_id = board_id
-        self.pattern = re.compile("(?P<client>\d+)\s-\s(?P<otype>.*)\s(?P<metal>.*)")
+        self.pattern = re.compile("(?P<client>\d+)\s-\s(?P<otype>.*)")
         self.fieldnames = [
             "A Trade Date",
             "E Location",
@@ -42,6 +42,7 @@ class TradeCardReader:
         ]
         self.csv_card_mappping = {
             "Trade Date": "A Trade Date",
+            "Delivery Date": "B Delivery Date",
             "Client Number": "Client",
             "Document No": "M Document No.",
             "Location": "E Location",
@@ -54,6 +55,10 @@ class TradeCardReader:
             "Pricing Method": "F Pricing Option",
             "Remarks+": "J Remarks",
             "Labels": "labelIds",
+            "Things To Do": "Things To Do",
+            "Operations Team Execution": "Operations Team Execution",
+            "BD/CR Action Needed": "BD/CR Action Needed",
+            "Completed Trades": "Completed Trades",
         }
 
     def load_level1_custom_fields(self):
@@ -285,9 +290,70 @@ class TradeCardReader:
             print("Could not load {}".format(field_name))
         except Exception as ex:
             print("Error loading {}".format(field_name))
-        print(self.board_lists)
+        print(">>> BOARD LISTS <<<<", self.board_lists)
 
-        print(moved_cards[:4])
+    def get_moved_cards(self):
+        query_field = {
+            "$and": [
+                {"boardId": self.board_id},
+                {"activityType": {"$in": ["createCard", "moveCard"]}},
+                {"listId": {"$in": list(self.board_lists.keys())}},
+            ]
+        }
+
+        filter_fields = {
+            "listId": 1,
+            "listName": 1,
+            "cardId": 1,
+            "modifiedAt": 1,
+            "createdAt": 1,
+        }
+        moved_cards = self.db["activities"].find(query_field, filter_fields)
+        # Map Card movement to titles
+        self.mapped_moved_cards = {}
+
+        for card in moved_cards:
+            try:
+                if card["listId"] == "XbpDFBQhQCLgRkZar":
+                    print(
+                        "Processing ",
+                        card["modifiedAt"],
+                        card[self.board_lists["XbpDFBQhQCLgRkZar"]],
+                        card["title"],
+                    )
+
+                self.mapped_moved_cards[card["cardId"]][
+                    self.board_lists[card["listId"]]
+                ] = card["modifiedAt"]
+            except KeyError as ke:
+                self.mapped_moved_cards[card["cardId"]] = {}
+                self.mapped_moved_cards[card["cardId"]][
+                    self.board_lists[card["listId"]]
+                ] = card["modifiedAt"]
+
+    def get_trade_object(self):
+        trade = {}
+        trade = {
+            "Trade Date": "",
+            "Delivery Date": "",
+            "Client Number": "",
+            "Document No": "",
+            "Location": "",
+            "Transaction Type": "",
+            "Metal": "",
+            "Order Type": "",
+            "Order Detail": "",
+            "Premium (%)": "",
+            "Referral": "",
+            "Pricing Method": "",
+            "Remarks+": "",
+            "Labels": "",
+            "Things To Do": "",
+            "Operations Team Execution": "",
+            "BD/CR Action Needed": "",
+            "Completed Trades": "",
+        }
+        return trade
 
     def get_trades_for_board(self):
         cards = self.db["cards"].find({"boardId": self.board_id})
@@ -297,6 +363,7 @@ class TradeCardReader:
                 raw_trade = {}
                 match_result = self.pattern.match(card["title"])
                 if match_result:
+                    raw_trade["id"] = card["_id"]
                     for field in card["customFields"]:
                         try:
                             raw_trade[self.customfields[field["_id"]]] = field["value"]
@@ -308,21 +375,33 @@ class TradeCardReader:
                         raw_trade["labelIds"] = []
                     matched_dict = match_result.groupdict()
                     raw_trade["Client"] = matched_dict["client"]
+                    raw_trade["Things To Do"] = ""
+                    raw_trade["Operations Team Execution"] = ""
+                    raw_trade["BD/CR Action Needed"] = ""
+                    raw_trade["Completed Trades"] = ""
                     raw_trades.append(raw_trade)
             except KeyError as ke:
+                # print ("KeyError ", ke)
                 pass
-            except:
+            except Exception as ex:
+                # print ("Error ", ex)
                 pass
         no_of_raw_trade = len(raw_trades)
         print("Total {} raw trades found".format(no_of_raw_trade))
         trades = []
         for raw_trade in raw_trades:
             try:
-                trade = {
-                    csv_field: raw_trade[card_field]
-                    for (csv_field, card_field) in self.csv_card_mappping.items()
-                    if card_field != ""
-                }
+                trade = self.get_trade_object()
+                for (csv_field, card_field) in self.csv_card_mappping.items():
+                    try:
+                        trade[csv_field] = raw_trade[card_field]
+                    except KeyError as ke:
+                        pass
+                #                trade = {
+                #                   csv_field: raw_trade[card_field]
+                #                  for (csv_field, card_field) in self.csv_card_mappping.items()
+                #                 if card_field != ""
+                #            }
                 # Replace level 2 mapping
                 trade["Location"] = (
                     self.locations[trade["Location"]] if trade["Location"] else ""
@@ -343,12 +422,51 @@ class TradeCardReader:
                 trade["Metal"] = (
                     self.metal_types[trade["Metal"]] if trade["Metal"] else ""
                 )
+                try:
+                    card_move_lists = self.mapped_moved_cards[raw_trade["id"]]
+                except KeyError as ke:
+                    print(ke)
+                # print (">>> {}".format(raw_trade["id"]), card_move_lists)
+                try:
+                    trade["Things To Do"] = card_move_lists["Things To Do"].strftime(
+                        "%d/%m/%Y"
+                    )
+                except KeyError as ke:
+                    trade["Things To Do"] = ""
+
+                try:
+                    trade["Operations Team Execution"] = card_move_lists[
+                        "Operations Team Execution"
+                    ].strftime("%d/%m/%Y")
+                except KeyError as ke:
+                    trade["Operations Team Execution"] = ""
+
+                try:
+                    trade["BD/CR Action Needed"] = card_move_lists[
+                        "BD/CR Action Needed"
+                    ].strftime("%d/%m/%Y")
+                except KeyError as ke:
+                    trade["BD/CR Action Needed"] = ""
+
+                try:
+                    trade["Completed Trades"] = card_move_lists[
+                        "Completed Trades"
+                    ].strftime("%d/%m/%Y")
+                except KeyError as ke:
+                    trade["Completed Trades"] = ""
+
                 # Formatting
                 trade["Trade Date"] = (
-                    trade["Trade Date"].strftime("%d-%m-%Y")
+                    trade["Trade Date"].strftime("%d/%m/%Y")
                     if trade["Trade Date"]
                     else ""
                 )
+                trade["Delivery Date"] = (
+                    trade["Delivery Date"].strftime("%d/%m/%Y")
+                    if trade["Delivery Date"]
+                    else ""
+                )
+                card_labels = [self.labels[lid] for lid in trade["Labels"]]
                 card_labels = [self.labels[lid] for lid in trade["Labels"]]
                 csv_labels = " | "
                 csv_labels = csv_labels.join(card_labels)
@@ -356,9 +474,12 @@ class TradeCardReader:
                 trades.append(trade)
             except KeyError as ke:
                 pass
-                # print(ke)
-            except:
+
+            except Exception as ex:
                 pass
+
+        no_of_qurated_trade = len(trades)
+        print("Total {} qurated trades found".format(no_of_qurated_trade))
         self.trades = trades
 
     def export_trades(self, ofile):
@@ -380,5 +501,6 @@ if __name__ == "__main__":
     tcr.load_pricing_options()
     tcr.load_metal_types()
     tcr.load_labels()
+    tcr.get_moved_cards()
     tcr.get_trades_for_board()
     tcr.export_trades("gpm-trades-2020.csv")
