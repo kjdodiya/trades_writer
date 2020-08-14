@@ -2,12 +2,11 @@ from pymongo import MongoClient
 import csv
 import re
 
-
 class TradeCardReader:
-    def __init__(self, board_slug):
-        self.mongo_host = "localhost"
-        self.mongo_port = 27019
-        self.db_name = "wekan"
+    def __init__(self, board_slug, mh, mp, mdb):
+        self.mongo_host = mh
+        self.mongo_port = mp
+        self.db_name = mdb
         self.client = MongoClient(self.mongo_host, self.mongo_port)
         self.db = self.client[self.db_name]
         self.customfields = {}
@@ -397,11 +396,6 @@ class TradeCardReader:
                         trade[csv_field] = raw_trade[card_field]
                     except KeyError as ke:
                         pass
-                #                trade = {
-                #                   csv_field: raw_trade[card_field]
-                #                  for (csv_field, card_field) in self.csv_card_mappping.items()
-                #                 if card_field != ""
-                #            }
                 # Replace level 2 mapping
                 trade["Location"] = (
                     self.locations[trade["Location"]] if trade["Location"] else ""
@@ -426,7 +420,6 @@ class TradeCardReader:
                     card_move_lists = self.mapped_moved_cards[raw_trade["id"]]
                 except KeyError as ke:
                     print(ke)
-                # print (">>> {}".format(raw_trade["id"]), card_move_lists)
                 try:
                     trade["Things To Do"] = card_move_lists["Things To Do"].strftime(
                         "%d/%m/%Y"
@@ -491,16 +484,3 @@ class TradeCardReader:
         print("Trades exported to CSV in file {}".format(ofile))
 
 
-if __name__ == "__main__":
-    tcr = TradeCardReader("gpm-trades-2020")
-    tcr.load_lists()
-    tcr.load_level1_custom_fields()
-    tcr.load_locations()
-    tcr.load_transaction_type()
-    tcr.load_order_type()
-    tcr.load_pricing_options()
-    tcr.load_metal_types()
-    tcr.load_labels()
-    tcr.get_moved_cards()
-    tcr.get_trades_for_board()
-    tcr.export_trades("gpm-trades-2020.csv")
