@@ -2,6 +2,7 @@ from pymongo import MongoClient
 import csv
 import re
 
+
 class TradeCardReader:
     def __init__(self, board_slug, mh, mp, mdb):
         self.mongo_host = mh
@@ -482,5 +483,3 @@ class TradeCardReader:
             trades_csv_writer.writeheader()
             trades_csv_writer.writerows(self.trades)
         print("Trades exported to CSV in file {}".format(ofile))
-
-
