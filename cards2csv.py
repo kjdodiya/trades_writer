@@ -29,7 +29,9 @@ if __name__ == "__main__":
 
     odir = args.odir
 
-    ofile = "{}_{}.csv".format(board_slug, datetime.now().strftime("%Y%m%d%H%M%S"))
+    ofile = "{}-{}.csv".format(
+        "Trade-Status-Report", datetime.now().strftime("%d-%b-%Y")
+    )
     print("Generating  : {}".format(ofile))
 
     tcr = TradeCardReader(board_slug, mongo_host, mongo_port, mongo_db)
