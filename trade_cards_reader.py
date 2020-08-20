@@ -1,10 +1,12 @@
 from pymongo import MongoClient
 import csv
 import re
+from gpm_logger import GPMLogger
 
 
 class TradeCardReader:
     def __init__(self, board_slug, mh, mp, mdb):
+        self.logger = GPMLogger("card_reader").get_logger()
         self.mongo_host = mh
         self.mongo_port = mp
         self.db_name = mdb
@@ -56,7 +58,7 @@ class TradeCardReader:
             "Remarks+": "J Remarks",
             "Labels": "labelIds",
             "Things To Do": "Things To Do",
-            "Operations Team Execution": "Operations Team Execution",
+            "Operations Team Action": "Operations Team Action",
             "BD/CR Action Needed": "BD/CR Action Needed",
             "Completed Trades": "Completed Trades",
         }
@@ -96,21 +98,23 @@ class TradeCardReader:
             self.locations = self.__map_id_val(raw_locations, "name")
             no_of_locations = len(self.locations)
             if no_of_locations > 0:
-                print(
-                    "Location load Successful : {} locations loaded".format(
-                        len(self.locations)
+                self.logger.info(
+                    "LOCATION LOAD : SUCCESS - {loc_count} locations loaded".format(
+                        loc_count=len(self.locations)
                     )
                 )
             elif no_of_locations == 0:
-                print("Location load successful : There are no locations")
+                self.logger.info(
+                    "LOCTATION LOAD : SUCCESS - Location load successful but there are {loc_count} locations loaded".format(
+                        loc_count=len(self.locations)
+                    )
+                )
             else:
-                print("Error loading locations")
+                self.logger.info("LOCATION LOAD : FAILED - Could not load locations")
         except KeyError as ke:
-            print("One or more Key could not be found. Check MongoDB")
-            print("Could not load locations")
+            self.logger.debug("LOCATION LOAD : FAILED - {msg}".format(msg=ke))
         except Exception as ex:
-            print(ex)
-            print("Could not load locations")
+            self.logger.debug("LOCATION LOAD : FAILED - {msg}".format(msg=ex))
 
     def load_transaction_type(self):
         """
@@ -349,7 +353,7 @@ class TradeCardReader:
             "Remarks+": "",
             "Labels": "",
             "Things To Do": "",
-            "Operations Team Execution": "",
+            "Operations Team Action": "",
             "BD/CR Action Needed": "",
             "Completed Trades": "",
         }
@@ -376,7 +380,7 @@ class TradeCardReader:
                     matched_dict = match_result.groupdict()
                     raw_trade["Client"] = matched_dict["client"]
                     raw_trade["Things To Do"] = ""
-                    raw_trade["Operations Team Execution"] = ""
+                    raw_trade["Operations Team Action"] = ""
                     raw_trade["BD/CR Action Needed"] = ""
                     raw_trade["Completed Trades"] = ""
                     raw_trades.append(raw_trade)
@@ -429,11 +433,11 @@ class TradeCardReader:
                     trade["Things To Do"] = ""
 
                 try:
-                    trade["Operations Team Execution"] = card_move_lists[
-                        "Operations Team Execution"
+                    trade["Operations Team Action"] = card_move_lists[
+                        "Operations Team Action"
                     ].strftime("%d/%m/%Y")
                 except KeyError as ke:
-                    trade["Operations Team Execution"] = ""
+                    trade["Operations Team Action"] = ""
 
                 try:
                     trade["BD/CR Action Needed"] = card_move_lists[
