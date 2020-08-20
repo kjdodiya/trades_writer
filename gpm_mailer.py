@@ -5,7 +5,9 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import loguru
+from loguru import logger
 from datetime import datetime
+from gpm_logger import GPMLogger
 
 
 class GPMMailer:
@@ -15,15 +17,13 @@ class GPMMailer:
         self.sender = sender
         self.receivers = None
         self.mail = None
+        self.logger = GPMLogger("mail").get_logger()
 
     def send_mail(self):
         """
         Send emails with or w/o attachment
         """
         try:
-            print(self.mail.as_string())
-            print(self.receivers)
-            print(self.sender)
             send_status = self.smtp_obj.sendmail(
                 self.sender, self.receivers, self.mail.as_string()
             )
@@ -39,16 +39,16 @@ class GPMMailer:
 class GPMReportMailer(GPMMailer):
     def __init__(self, sender):
         self.subject_fmt = "Trade Status Report - {}"
-        self.message_body_fmt = "(--- TESTING IGNORE ---)\nDear team, please find Trade Status Report for the week ended {}.\nThank you."
-        self.body_html_fmt = """<html><body>
-                <p>Dear team,<br>
-                <p>Please find Trade Status Report for the week ended {}.</p> 
-                <p>Thank you.</p> 
-              </body>
-            </html>"""
+        self.body_text_fmt = "Dear team,\nPlease find Trade Status Report for the week ended {}.\nThank you."
+        self.body_html_fmt = "<html><body><p>Dear team,<br><p>Please find Trade Status Report for the week ended {}.</p><p>Thank you.</p></body></html>"
         GPMMailer.__init__(self, sender)
 
     def compose_email(self, time_stamp, receivers, report_file):
+        self.logger.info(
+            "Composing email to send report {rf} for week ending {ts}",
+            rf=report_file,
+            ts=time_stamp,
+        )
         self.receivers = receivers
         msg = MIMEMultipart()
         msg["Subject"] = self.subject_fmt.format(time_stamp)
@@ -61,9 +61,18 @@ class GPMReportMailer(GPMMailer):
             mime_html = MIMEText(message_body, "html")
             msg.attach(mime_html)
         except Exception as ex:
-            print("Could not attach text")
+            self.logger.debug(
+                "Could not attach text while sending {rf} {exmsg}",
+                rf=report_file,
+                exmsg=ex,
+            )
 
         try:
+            self.logger.info(
+                "Trying to attach {rf} for week ending {ts}",
+                rf=report_file,
+                ts=time_stamp,
+            )
             fp = open(report_file)
             attachment = MIMEApplication(fp.read(), _subtype="csv")
             attachment.add_header(
@@ -71,6 +80,16 @@ class GPMReportMailer(GPMMailer):
             )
             msg.attach(attachment)
             self.mail = msg
-
+            self.logger.info(
+                "Report file {rf} attached successfully for week ending {ts}",
+                rf=report_file,
+                ts=time_stamp,
+            )
+            self.logger.info(
+                "Email composition to send report for week ening {ts} composed successfully",
+                ts=time_stamp,
+            )
         except Exception as ex:
-            print("Could not attach report")
+            self.logger.debug(
+                "Could not attach report {rf} {exmsg}", rf=report_file, exmsg=ex
+            )
