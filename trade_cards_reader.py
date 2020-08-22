@@ -341,14 +341,6 @@ class TradeCardReader:
 
         for card in moved_cards:
             try:
-                if card["listId"] == "XbpDFBQhQCLgRkZar":
-                    print(
-                        "Processing ",
-                        card["modifiedAt"],
-                        card[self.board_lists["XbpDFBQhQCLgRkZar"]],
-                        card["title"],
-                    )
-
                 self.mapped_moved_cards[card["cardId"]][
                     self.board_lists[card["listId"]]
                 ] = card["modifiedAt"]
