@@ -18,7 +18,7 @@ class TradeCardReader:
         board_id = self.db["boards"].find_one({"slug": board_slug})["_id"]
         self.board_id = board_id
         self.pattern = re.compile("(?P<client>\d+)\s-\s(?P<otype>.*)")
-        self.csv_card_mappping = {
+        self.csv_card_mapping = {
             "Trade Date": "A Trade Date",
             "Delivery Date": "B Delivery Date",
             "Client Number": "Client",
@@ -38,6 +38,7 @@ class TradeCardReader:
             "BD/CR Action Needed": "BD/CR Action Needed",
             "Completed Trades": "Completed Trades",
         }
+        self.trade_obj = {k: "" for k in self.csv_card_mapping.keys()}
 
     def load_level1_custom_fields(self):
         """
@@ -74,9 +75,9 @@ class TradeCardReader:
             )
             raw_locations = location_items["settings"]["dropdownItems"]
             self.locations = self.__map_id_val(raw_locations, "name")
-            no_of_locations = len(self.locations)
+            no_of_items = len(self.locations)
             if no_of_items > 0:
-                self.logger.info(
+                self.logger.success(
                     "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
                         fn=field_name, cnt=no_of_items
                     )
@@ -99,6 +100,7 @@ class TradeCardReader:
             self.logger.debug(
                 "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
             )
+        return no_of_items
 
     def load_transaction_type(self):
         """
@@ -111,13 +113,13 @@ class TradeCardReader:
             self.txn_types = self.__map_id_val(raw_items, "name")
             no_of_items = len(self.txn_types)
             if no_of_items > 0:
-                self.logger.info(
-                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                self.logger.success(
+                    "Loading {fn} : {cnt}  {fn} loaded successfully".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
             elif no_of_items == 0:
-                self.logger.info(
+                self.logger.success(
                     "Loading {fn} : SUCCESS - No {fn}. {cnt} {fn}".format(
                         fn=field_name, cnt=no_of_items
                     )
@@ -134,6 +136,7 @@ class TradeCardReader:
             self.logger.debug(
                 "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
             )
+        return no_of_items
 
     def load_order_type(self):
         """
@@ -146,14 +149,14 @@ class TradeCardReader:
             self.order_types = self.__map_id_val(raw_items, "name")
             no_of_items = len(self.order_types)
             if no_of_items > 0:
-                self.logger.info(
-                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                self.logger.success(
+                    "Loading {fn} : {cnt}  {fn} loaded successfully".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
             elif no_of_items == 0:
                 self.logger.info(
-                    "Loading {fn} : SUCCESS - No {fn}. {cnt} {fn}".format(
+                    "Loading {fn} : No {fn}. {cnt} {fn}".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
@@ -169,6 +172,7 @@ class TradeCardReader:
             self.logger.debug(
                 "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
             )
+        return no_of_items
 
     def load_pricing_options(self):
         """
@@ -181,14 +185,14 @@ class TradeCardReader:
             self.pricing_options = self.__map_id_val(raw_items, "name")
             no_of_items = len(self.pricing_options)
             if no_of_items > 0:
-                self.logger.info(
-                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                self.logger.success(
+                    "Loading {fn} : {cnt}  {fn} loaded successfully".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
             elif no_of_items == 0:
-                self.logger.info(
-                    "Loading {fn} : SUCCESS - No {fn}. {cnt} {fn}".format(
+                self.logger.success(
+                    "Loading {fn} : No {fn}. {cnt} {fn}".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
@@ -204,6 +208,7 @@ class TradeCardReader:
             self.logger.debug(
                 "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
             )
+        return no_of_items
 
     def load_metal_types(self):
         """
@@ -216,14 +221,14 @@ class TradeCardReader:
             self.metal_types = self.__map_id_val(raw_items, "name")
             no_of_items = len(self.metal_types)
             if no_of_items > 0:
-                self.logger.info(
-                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                self.logger.success(
+                    "Loading {fn} : {cnt}  {fn} loaded successfully".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
             elif no_of_items == 0:
-                self.logger.info(
-                    "Loading {fn} : SUCCESS - No {fn}. {cnt} {fn}".format(
+                self.logger.success(
+                    "Loading {fn} : No {fn}. {cnt} {fn}".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
@@ -239,6 +244,7 @@ class TradeCardReader:
             self.logger.debug(
                 "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
             )
+        return no_of_items
 
     def load_labels(self):
         """
@@ -252,7 +258,7 @@ class TradeCardReader:
             self.labels = self.__map_id_val(raw_items, "name")
             no_of_items = len(self.labels)
             if no_of_items > 0:
-                self.logger.info(
+                self.logger.success(
                     "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
                         fn=field_name, cnt=no_of_items
                     )
@@ -275,6 +281,7 @@ class TradeCardReader:
             self.logger.debug(
                 "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
             )
+        return no_of_items
 
     def load_lists(self):
         """
@@ -287,13 +294,13 @@ class TradeCardReader:
             self.board_lists = self.__map_id_val(raw_items, "title")
             no_of_items = len(self.board_lists)
             if no_of_items > 0:
-                self.logger.info(
+                self.logger.success(
                     "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
             elif no_of_items == 0:
-                self.logger.info(
+                self.logger.success(
                     "Loading {fn} : SUCCESS - No {fn}. {cnt} {fn}".format(
                         fn=field_name, cnt=no_of_items
                     )
@@ -310,6 +317,7 @@ class TradeCardReader:
             self.logger.debug(
                 "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
             )
+        return no_of_items
 
     def get_moved_cards(self):
         query_field = {
@@ -351,8 +359,6 @@ class TradeCardReader:
                 ] = card["modifiedAt"]
 
     def get_trade_object(self):
-        trade = {}
-        trade = {key: "" for key in self.csv_card_mapping.keys()}
         trade = {
             "Trade Date": "",
             "Delivery Date": "",
@@ -407,12 +413,13 @@ class TradeCardReader:
                 # print ("Error ", ex)
                 pass
         no_of_raw_trade = len(raw_trades)
-        print("Total {} raw trades found".format(no_of_raw_trade))
+        self.logger.info("Total {} raw trades found".format(no_of_raw_trade))
         trades = []
         for raw_trade in raw_trades:
             try:
                 trade = self.get_trade_object()
-                for (csv_field, card_field) in self.csv_card_mappping.items():
+
+                for (csv_field, card_field) in self.csv_card_mapping.items():
                     try:
                         trade[csv_field] = raw_trade[card_field]
                     except KeyError as ke:
@@ -493,7 +500,7 @@ class TradeCardReader:
                 pass
 
         no_of_qurated_trade = len(trades)
-        print("Total {} qurated trades found".format(no_of_qurated_trade))
+        self.logger.info("Total {} qurated trades found".format(no_of_qurated_trade))
         self.trades = trades
 
     def export_trades(self, ofile):
