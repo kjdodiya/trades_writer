@@ -65,6 +65,8 @@ class TradeCardReader:
         """
         Load Locations
         """
+        field_name = "Location"
+        no_of_items = -1
         try:
             customfields = self.db.customFields
             location_items = customfields.find_one(
@@ -73,204 +75,241 @@ class TradeCardReader:
             raw_locations = location_items["settings"]["dropdownItems"]
             self.locations = self.__map_id_val(raw_locations, "name")
             no_of_locations = len(self.locations)
-            if no_of_locations > 0:
+            if no_of_items > 0:
                 self.logger.info(
-                    "LOCATION LOAD : SUCCESS - {loc_count} locations loaded".format(
-                        loc_count=len(self.locations)
+                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
-            elif no_of_locations == 0:
+            elif no_of_items == 0:
                 self.logger.info(
-                    "LOCTATION LOAD : SUCCESS - Location load successful but there are {loc_count} locations loaded".format(
-                        loc_count=len(self.locations)
+                    "Loading {fn} : SUCCESS - No {fn}. {cnt} {fn}".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
             else:
-                self.logger.info("LOCATION LOAD : FAILED - Could not load locations")
+                self.logger.info(
+                    "Loading {fn} : FAILED - Could not load {fn}".format(fn=field_name)
+                )
         except KeyError as ke:
-            self.logger.debug("LOCATION LOAD : FAILED - {msg}".format(msg=ke))
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ke)
+            )
         except Exception as ex:
-            self.logger.debug("LOCATION LOAD : FAILED - {msg}".format(msg=ex))
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
+            )
 
     def load_transaction_type(self):
         """
         Load Transaction Type
         """
         field_name = "Transcation Type"
+        no_of_items = -1
         try:
             raw_items = self.__load_dropdown_items("C Transaction Type")
             self.txn_types = self.__map_id_val(raw_items, "name")
             no_of_items = len(self.txn_types)
             if no_of_items > 0:
-                print(
-                    "{} load Successful : {} {} loaded".format(
-                        field_name, no_of_items, field_name
+                self.logger.info(
+                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
             elif no_of_items == 0:
-                print(
-                    "{} load successful : There are no {}".format(
-                        field_name, field_name
+                self.logger.info(
+                    "Loading {fn} : SUCCESS - No {fn}. {cnt} {fn}".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
             else:
-                print("Error loading {}".format(field_name))
+                self.logger.info(
+                    "Loading {fn} : FAILED - Could not load {fn}".format(fn=field_name)
+                )
         except KeyError as ke:
-            print("One or more Key could not be found. Check MongoDB")
-            print("Could not load {}".format(field_name))
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ke)
+            )
         except Exception as ex:
-            print(ex)
-            print("Could not load {}".format(field_name))
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
+            )
 
     def load_order_type(self):
         """
         Load Order Type
         """
         field_name = "Order Type"
+        no_of_items = -1
         try:
             raw_items = self.__load_dropdown_items("D Order Type")
             self.order_types = self.__map_id_val(raw_items, "name")
             no_of_items = len(self.order_types)
             if no_of_items > 0:
-                print(
-                    "{} load Successful : {} {} loaded".format(
-                        field_name, no_of_items, field_name
+                self.logger.info(
+                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
             elif no_of_items == 0:
-                print(
-                    "{} load successful : There are no {}".format(
-                        field_name, field_name
+                self.logger.info(
+                    "Loading {fn} : SUCCESS - No {fn}. {cnt} {fn}".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
             else:
-                print("Error loading {}".format(field_name))
+                self.logger.info(
+                    "Loading {fn} : FAILED - Could not load {fn}".format(fn=field_name)
+                )
         except KeyError as ke:
-            print("One or more Key could not be found. Check MongoDB")
-            print("Could not load {}".format(field_name))
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ke)
+            )
         except Exception as ex:
-            print(ex)
-            print("Could not load {}".format(field_name))
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
+            )
 
     def load_pricing_options(self):
         """
         Load Pricing Options
         """
         field_name = "Pricing Option"
+        no_of_items = -1
         try:
             raw_items = self.__load_dropdown_items("F Pricing Option")
             self.pricing_options = self.__map_id_val(raw_items, "name")
             no_of_items = len(self.pricing_options)
             if no_of_items > 0:
-                print(
-                    "{} load Successful : {} {} loaded".format(
-                        field_name, no_of_items, field_name
+                self.logger.info(
+                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
             elif no_of_items == 0:
-                print(
-                    "{} load successful : There are no {}".format(
-                        field_name, field_name
+                self.logger.info(
+                    "Loading {fn} : SUCCESS - No {fn}. {cnt} {fn}".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
             else:
-                print("Error loading {}".format(field_name))
+                self.logger.info(
+                    "Loading {fn} : FAILED - Could not load {fn}".format(fn=field_name)
+                )
         except KeyError as ke:
-            print("One or more Key could not be found. Check MongoDB")
-            print("Could not load {}".format(field_name))
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ke)
+            )
         except Exception as ex:
-            print(ex)
-            print("Could not load {}".format(field_name))
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
+            )
 
     def load_metal_types(self):
         """
         Load Metal type
         """
         field_name = "Metal"
+        no_of_items = -1
         try:
             raw_items = self.__load_dropdown_items("L Metal")
             self.metal_types = self.__map_id_val(raw_items, "name")
             no_of_items = len(self.metal_types)
             if no_of_items > 0:
-                print(
-                    "{} load Successful : {} {} loaded".format(
-                        field_name, no_of_items, field_name
+                self.logger.info(
+                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
-                print(self.metal_types)
             elif no_of_items == 0:
-                print(
-                    "{} load successful : There are no {}".format(
-                        field_name, field_name
+                self.logger.info(
+                    "Loading {fn} : SUCCESS - No {fn}. {cnt} {fn}".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
             else:
-                print("Error loading {}".format(field_name))
+                self.logger.info(
+                    "Loading {fn} : FAILED - Could not load {fn}".format(fn=field_name)
+                )
         except KeyError as ke:
-            print("One or more Key could not be found. Check MongoDB")
-            print("Could not load {}".format(field_name))
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ke)
+            )
         except Exception as ex:
-            print("Error loading {}".format(field_name))
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
+            )
 
     def load_labels(self):
         """
         Load Labels for a Board
         """
         field_name = "Labels"
+        no_of_items = -1
         try:
             board = self.db.boards.find_one({"_id": self.board_id})
             raw_items = board["labels"]
             self.labels = self.__map_id_val(raw_items, "name")
             no_of_items = len(self.labels)
             if no_of_items > 0:
-                print(
-                    "{} load Successful : {} {} loaded".format(
-                        field_name, no_of_items, field_name
+                self.logger.info(
+                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
             elif no_of_items == 0:
-                print(
-                    "{} load successful : There are no {}".format(
-                        field_name, field_name
+                self.logger.info(
+                    "Loading {fn} : SUCCESS - No {fn}. {cnt} {fn}".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
             else:
-                print("Error loading {}".format(field_name))
+                self.logger.info(
+                    "Loading {fn} : FAILED - Could not load {fn}".format(fn=field_name)
+                )
         except KeyError as ke:
-            print("One or more Key could not be found. Check MongoDB")
-            print("Could not load {}".format(field_name))
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ke)
+            )
         except Exception as ex:
-            print("Error loading {}".format(field_name))
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
+            )
 
     def load_lists(self):
         """
         Load Lists in the board
         """
         field_name = "Board Lists"
+        no_of_items = -1
         try:
             raw_items = self.db.lists.find({"boardId": self.board_id})
             self.board_lists = self.__map_id_val(raw_items, "title")
             no_of_items = len(self.board_lists)
             if no_of_items > 0:
-                print(
-                    "{} load Successful : {} {} loaded".format(
-                        field_name, no_of_items, field_name
+                self.logger.info(
+                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
             elif no_of_items == 0:
-                print(
-                    "{} load successful : There are no {}".format(
-                        field_name, field_name
+                self.logger.info(
+                    "Loading {fn} : SUCCESS - No {fn}. {cnt} {fn}".format(
+                        fn=field_name, cnt=no_of_items
                     )
                 )
             else:
-                print("Error loading {}".format(field_name))
+                self.logger.info(
+                    "Loading {fn} : FAILED - Could not load {fn}".format(fn=field_name)
+                )
         except KeyError as ke:
-            print("One or more Key could not be found. Check MongoDB")
-            print("Could not load {}".format(field_name))
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ke)
+            )
         except Exception as ex:
-            print("Error loading {}".format(field_name))
-        print(">>> BOARD LISTS <<<<", self.board_lists)
+            self.logger.debug(
+                "Loading {fn} : FAILED - {msg}".format(fn=field_name, msg=ex)
+            )
 
     def get_moved_cards(self):
         query_field = {
@@ -313,6 +352,7 @@ class TradeCardReader:
 
     def get_trade_object(self):
         trade = {}
+        trade = {key: "" for key in self.csv_card_mapping.keys()}
         trade = {
             "Trade Date": "",
             "Delivery Date": "",
