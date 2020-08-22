@@ -27,3 +27,5 @@ echo -e $dummy_line > $rf
 
 # Send this dummmy report to the gpmdev DL
 python gpm_send_reports.py --recipients gpmdev@global-precious-metals.com
+
+cp $rf  $rf".orig"
