@@ -4,8 +4,10 @@ import argparse
 import os
 from datetime import datetime
 from trade_cards_reader import TradeCardReader
+from gpm_logger import GPMLogger
 
 if __name__ == "__main__":
+    logger = GPMLogger("report_generator").get_logger()
     parser = argparse.ArgumentParser(description="Generate csv for trade cards")
     parser.add_argument(
         "-b",
@@ -32,7 +34,7 @@ if __name__ == "__main__":
     ofile = "{}-{}.csv".format(
         "Trade-Status-Report", datetime.now().strftime("%d-%b-%Y")
     )
-    print("Generating  : {}".format(ofile))
+    logger.info("Generating  : {}".format(ofile))
 
     tcr = TradeCardReader(board_slug, mongo_host, mongo_port, mongo_db)
     tcr.load_lists()
@@ -45,4 +47,5 @@ if __name__ == "__main__":
     tcr.load_labels()
     tcr.get_moved_cards()
     tcr.get_trades_for_board()
+
     tcr.export_trades(ofile)
