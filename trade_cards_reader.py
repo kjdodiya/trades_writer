@@ -501,4 +501,4 @@ class TradeCardReader:
             trades_csv_writer = csv.DictWriter(trades_csv, keys)
             trades_csv_writer.writeheader()
             trades_csv_writer.writerows(self.trades)
-        print("Trades exported to CSV in file {}".format(ofile))
+        self.logger.info("Trade Status exported to file {fn}".format(fn=ofile))
