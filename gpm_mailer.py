@@ -51,11 +51,12 @@ class GPMReportMailer(GPMMailer):
             ts=time_stamp,
         )
         self.receivers = receivers
+
         msg = MIMEMultipart()
         msg["Subject"] = self.subject_fmt.format(time_stamp)
         msg["From"] = self.sender
-        rcvrs = ""
-        rcvrs.join(receivers)
+        rcvrs = ","
+        rcvrs = rcvrs.join(receivers)
         msg["To"] = rcvrs
         try:
             message_body = self.body_html_fmt.format(time_stamp)
