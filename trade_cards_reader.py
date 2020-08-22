@@ -18,30 +18,6 @@ class TradeCardReader:
         board_id = self.db["boards"].find_one({"slug": board_slug})["_id"]
         self.board_id = board_id
         self.pattern = re.compile("(?P<client>\d+)\s-\s(?P<otype>.*)")
-        self.fieldnames = [
-            "A Trade Date",
-            "E Location",
-            "C Transaction Type",
-            "D Order Type",
-            "H Bars Composition",
-            "G Transaction Premium (%)",
-            "I Referral",
-            "F Pricing Option",
-            "J Remarks",
-            "B Delivery Date",
-        ]
-        self.csv_header = [
-            "Trade Date",
-            "Location",
-            "Transaction Type",
-            "Order Type",
-            "Order Detail",
-            "Premium (%)",
-            "Referral",
-            "Pricing Method",
-            "Remarks",
-            "Delivery Date",
-        ]
         self.csv_card_mappping = {
             "Trade Date": "A Trade Date",
             "Delivery Date": "B Delivery Date",
