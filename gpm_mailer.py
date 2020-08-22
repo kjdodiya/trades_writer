@@ -1,5 +1,6 @@
 import smtplib
 import email
+import os
 from email import *
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -12,7 +13,7 @@ from gpm_logger import GPMLogger
 
 class GPMMailer:
     def __init__(self, sender):
-        self.__smtp_server = "X.X.X.X"  # Replace with SMTP server IP/host
+        self.__smtp_server = os.environ["SMTP_HOST"]  # Replace with SMTP server IP/host
         self.smtp_obj = smtplib.SMTP(self.__smtp_server)
         self.sender = sender
         self.receivers = None
