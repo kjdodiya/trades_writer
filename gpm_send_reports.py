@@ -15,7 +15,9 @@ def class_mailer(recipients):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Send Report to recipients")
-    parser.add_argument("-rcpts", "--recipients", help="Comma separated list of email")
+    parser.add_argument(
+        "-rcpts", "--recipients", required=True, help="Comma separated list of email"
+    )
 
     args = parser.parse_args()
     recipients = args.recipients.split(",")
