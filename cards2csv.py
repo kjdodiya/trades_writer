@@ -3,7 +3,7 @@
 import argparse
 import os
 from datetime import datetime
-from trade_cards_reader import TradeCardReader
+from gpm_trade_cards_reader import TradeCardReader
 from gpm_logger import GPMLogger
 
 if __name__ == "__main__":
