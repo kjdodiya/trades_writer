@@ -78,7 +78,7 @@ class TradeCardReader:
             no_of_items = len(self.locations)
             if no_of_items > 0:
                 self.logger.success(
-                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
@@ -114,7 +114,7 @@ class TradeCardReader:
             no_of_items = len(self.txn_types)
             if no_of_items > 0:
                 self.logger.success(
-                    "Loading {fn} : {cnt}  {fn} loaded successfully".format(
+                    "Loading {fn} : {cnt}  {fn} loaded".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
@@ -150,7 +150,7 @@ class TradeCardReader:
             no_of_items = len(self.order_types)
             if no_of_items > 0:
                 self.logger.success(
-                    "Loading {fn} : {cnt}  {fn} loaded successfully".format(
+                    "Loading {fn} : {cnt}  {fn} loaded".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
@@ -186,7 +186,7 @@ class TradeCardReader:
             no_of_items = len(self.pricing_options)
             if no_of_items > 0:
                 self.logger.success(
-                    "Loading {fn} : {cnt}  {fn} loaded successfully".format(
+                    "Loading {fn} : {cnt}  {fn} loaded".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
@@ -222,7 +222,7 @@ class TradeCardReader:
             no_of_items = len(self.metal_types)
             if no_of_items > 0:
                 self.logger.success(
-                    "Loading {fn} : {cnt}  {fn} loaded successfully".format(
+                    "Loading {fn} : {cnt}  {fn} loaded".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
@@ -259,7 +259,7 @@ class TradeCardReader:
             no_of_items = len(self.labels)
             if no_of_items > 0:
                 self.logger.success(
-                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
@@ -295,7 +295,7 @@ class TradeCardReader:
             no_of_items = len(self.board_lists)
             if no_of_items > 0:
                 self.logger.success(
-                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded successfully".format(
+                    "Loading {fn} : SUCCESS - {cnt}  {fn} loaded".format(
                         fn=field_name, cnt=no_of_items
                     )
                 )
