@@ -18,8 +18,14 @@ if __name__ == "__main__":
     file_date = datetime.now().strftime("%d-%b-%Y")
 
     parser = argparse.ArgumentParser(description="Send Report to recipients")
-    parser.add_argument(
-        "-rcpts", "--recipients", required=True, help="Comma separated list of email"
+    rcpt_group = parser.add_mutually_exclusive_group(required=True)
+    rcpt_group.add_argument(
+        "-rcpts", "--recipients", help="Comma separated list of email"
+    )
+    rcpt_group.add_argument(
+        "-rcpts-from-file",
+        "--recipients-from-file",
+        help="File containing email ids (one per line)",
     )
     parser.add_argument(
         "-dt", "--date", help="Date of the report to send", default=file_date
