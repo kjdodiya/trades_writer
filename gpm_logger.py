@@ -6,7 +6,7 @@ class GPMLogger:
     def __init__(self, name, rotation="1 day"):
         self.name = name
         self.info_log_file = "{nm}_{tmstmp}.log".format(
-            nm=self.name, tmstpm=datetime.now().strftime("%Y%m%d")
+            nm=self.name, tmstmp=datetime.now().strftime("%Y%m%d")
         )
         self.format = "{time} {level} {message}"
         logger.add(self.info_log_file, format=self.format, rotation=rotation)
