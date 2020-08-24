@@ -13,7 +13,7 @@ rf=`date +'Trade-Status-Report-%d-%b-%Y.csv'`
 python cards2csv.py
 
 # Send to So.  This should be removed once we are happy with email sendingscripts
-python gpm_send_reports.py --recipients so@global-precious-metals.com
+python gpm_send_reports.py --recipients mf@global-precious-metals.com,so@global-precious-metals.com
 
 # Backup original report
 cp $rf  $rf".orig"
