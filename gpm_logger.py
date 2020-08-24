@@ -13,10 +13,7 @@ class GPMLogger:
         )
         self.format = "{time} {level} {message}"
         logger.add(
-            self.info_log_file, format=self.format, level="INFO", rotation=rotation
-        )
-        logger.add(
-            self.info_log_file, format=self.format, level="DEBUG", rotation=rotation
+            self.info_log_file, format=self.format, rotation=rotation
         )
 
     def get_logger(self):
