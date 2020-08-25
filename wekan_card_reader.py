@@ -236,7 +236,7 @@ class TradeCardReader(WekanCardReader):
         return trade
 
     def load_raw_trades(self):
-        cards = self.db["cards"].find({"boardId": self.board_id})
+        cards = self.db["cards"].find({"boardId": self.board_id, 'archived': False})
         for card in cards:
             try:
                 raw_trade = deepcopy(self.raw_object)
