@@ -1,4 +1,4 @@
-from wekan_card_reader import TradeCardReader
+from trade_card_reader import TradeCardReader
 
 if __name__ == "__main__":
     board_slug = "gpm-trades-2020"
