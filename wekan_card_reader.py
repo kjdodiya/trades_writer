@@ -211,32 +211,10 @@ class TradeCardReader(WekanCardReader):
 
     def get_trade_object(self):
         trade = {k: "" for k in self.csv_card_mapping.keys()}
-        """
-        trade = {
-            "Trade Date": "",
-            "Delivery Date": "",
-            "Client Number": "",
-            "Document No": "",
-            "Location": "",
-            "Transaction Type": "",
-            "Metal": "",
-            "Order Type": "",
-            "Order Detail": "",
-            "Premium (%)": "",
-            "Referral": "",
-            "Pricing Method": "",
-            "Remarks+": "",
-            "Labels": "",
-            "Things To Do": "",
-            "Operations Team Action": "",
-            "BD/CR Action Needed": "",
-            "Completed Trades": "",
-        }
-        """
         return trade
 
     def load_raw_trades(self):
-        cards = self.db["cards"].find({"boardId": self.board_id, 'archived': False})
+        cards = self.db["cards"].find({"boardId": self.board_id, "archived": False})
         for card in cards:
             try:
                 raw_trade = deepcopy(self.raw_object)
@@ -248,20 +226,15 @@ class TradeCardReader(WekanCardReader):
                             raw_trade[field["_id"]] = field["value"]
                         except KeyError as ke:
                             raw_trade[field["_id"]] = ""
-                    """
-                    for l1fid, l1fval in self.l1_customfields.items():
-                        try:
-                            raw_trade[l1fid] = l1fval[raw_trade[l1fid]]
-                        except KeyError as ke:
-                            raw_trade[l1fid] = ""
-                    """
                     try:
                         raw_trade["labelIds"] = card["labelIds"]
                     except KeyError as ke:
                         raw_trade["labelIds"] = []
-                    """
+
                     matched_dict = match_result.groupdict()
                     raw_trade["Client"] = matched_dict["client"]
+
+                    """
                     raw_trade["Things To Do"] = ""
                     raw_trade["Operations Team Action"] = ""
                     raw_trade["BD/CR Action Needed"] = ""
@@ -278,7 +251,7 @@ class TradeCardReader(WekanCardReader):
         self.logger.info("Total {} raw trades found".format(no_of_raw_trade))
 
     def transform_raw_trade(self, trade):
-        xtrade = {}
+        xtrade = deepcopy(trade)
         l1cfkeys = list(self.l1_customfields.keys())
         for fid, fval in trade.items():
             try:
@@ -307,76 +280,11 @@ class TradeCardReader(WekanCardReader):
                     except KeyError as ke:
                         trade[csv_field] = ""
                         pass
-                # Replace level 2 mapping
-                """
-                trade["Location"] = (
-                    self.locations[trade["Location"]] if trade["Location"] else ""
-                )
-                trade["Transaction Type"] = (
-                    self.txn_types[trade["Transaction Type"]]
-                    if trade["Transaction Type"]
-                    else ""
-                )
-                trade["Order Type"] = (
-                    self.order_types[trade["Order Type"]] if trade["Order Type"] else ""
-                )
-                trade["Pricing Method"] = (
-                    self.pricing_options[trade["Pricing Method"]]
-                    if trade["Pricing Method"]
-                    else ""
-                )
-                trade["Metal"] = (
-                    self.metal_types[trade["Metal"]] if trade["Metal"] else ""
-                )
-                try:
-                    card_move_lists = self.mapped_moved_cards[raw_trade["id"]]
-                except KeyError as ke:
-                    print(ke)
-                try:
-                    trade["Things To Do"] = card_move_lists["Things To Do"].strftime(
-                        "%d/%m/%Y"
-                    )
-                except KeyError as ke:
-                    trade["Things To Do"] = ""
-
-                try:
-                    trade["Operations Team Action"] = card_move_lists[
-                        "Operations Team Action"
-                    ].strftime("%d/%m/%Y")
-                except KeyError as ke:
-                    trade["Operations Team Action"] = ""
-
-                try:
-                    trade["BD/CR Action Needed"] = card_move_lists[
-                        "BD/CR Action Needed"
-                    ].strftime("%d/%m/%Y")
-                except KeyError as ke:
-                    trade["BD/CR Action Needed"] = ""
-
-                try:
-                    trade["Completed Trades"] = card_move_lists[
-                        "Completed Trades"
-                    ].strftime("%d/%m/%Y")
-                except KeyError as ke:
-                    trade["Completed Trades"] = ""
-
-                # Formatting
-                trade["Trade Date"] = (
-                    trade["Trade Date"].strftime("%d/%m/%Y")
-                    if trade["Trade Date"]
-                    else ""
-                )
-                trade["Delivery Date"] = (
-                    trade["Delivery Date"].strftime("%d/%m/%Y")
-                    if trade["Delivery Date"]
-                    else ""
-                )
-                card_labels = [self.labels[lid] for lid in trade["Labels"]]
-                card_labels = [self.labels[lid] for lid in trade["Labels"]]
+                card_labels = [self.labels[lid] for lid in raw_trade["labelIds"]]
                 csv_labels = " | "
                 csv_labels = csv_labels.join(card_labels)
                 trade["Labels"] = csv_labels
-                """
+                # Replace level 2 mapping
                 trades.append(trade)
             except KeyError as ke:
                 pass
