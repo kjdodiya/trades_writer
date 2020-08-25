@@ -374,7 +374,7 @@ class TradeCardReader:
         return trade
 
     def get_trades_for_board(self):
-        cards = self.db["cards"].find({"boardId": self.board_id})
+        cards = self.db["cards"].find({"boardId": self.board_id, "archived":False})
         raw_trades = []
         for card in cards:
             try:
