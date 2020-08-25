@@ -41,7 +41,11 @@ class WekanCardReader:
 
     def __map_id_val(self, data, value_key):
         mapped_data = {}
-        mapped_data = {field["_id"]: field[value_key] for field in data}
+        for field in data:
+            try:
+                mapped_data[field["_id"]] = field[value_key]
+            except KeyError as ke:
+                self.logger.debug("FAILED - {msg}".format(msg=ke))
         return mapped_data
 
     def __load_dropdown_items(self, field_name):
@@ -187,5 +191,3 @@ class WekanCardReader:
         for field_id in self.board_lists.keys():
             raw_object[field_id] = ""
         self.raw_object = raw_object
-
-
