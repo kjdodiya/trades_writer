@@ -38,8 +38,6 @@ class WekanCardReader:
                 l1cfri = l1cf["settings"]["dropdownItems"]
                 l1cfmi = self.__map_id_val(l1cfri, "name")
                 self.l1_customfields[cfield["_id"]] = l1cfmi
-                # l1f = self.customfields.pop(cfield["_id"])
-                # print ("{l1f} is Level Field. Adding it to l1_customfields".format(l1f=l1f))
 
     def __map_id_val(self, data, value_key):
         mapped_data = {}
@@ -150,6 +148,19 @@ class WekanCardReader:
 
         for card in moved_cards:
             try:
+                self.mapped_moved_cards[card["cardId"]][card["listId"]] = card[
+                    "modifiedAt"
+                ]
+            except KeyError as ke:
+                if card["cardId"] == ke.args[0]:
+                    self.mapped_moved_cards[card["cardId"]] = {}
+                    self.mapped_moved_cards[card["cardId"]][card["listId"]] = card[
+                        "modifiedAt"
+                    ]
+                else:
+                    pass
+            """
+            try:
                 self.mapped_moved_cards[card["cardId"]][
                     self.board_lists[card["listId"]]
                 ] = card["modifiedAt"]
@@ -158,6 +169,7 @@ class WekanCardReader:
                 self.mapped_moved_cards[card["cardId"]][
                     self.board_lists[card["listId"]]
                 ] = card["modifiedAt"]
+            """
 
     def load_cards(self):
         self.load_custom_fields()
@@ -234,23 +246,21 @@ class TradeCardReader(WekanCardReader):
                     matched_dict = match_result.groupdict()
                     raw_trade["Client"] = matched_dict["client"]
 
-                    """
-                    raw_trade["Things To Do"] = ""
-                    raw_trade["Operations Team Action"] = ""
-                    raw_trade["BD/CR Action Needed"] = ""
-                    raw_trade["Completed Trades"] = ""
-                    """
                     self.raw_trades.append(raw_trade)
             except KeyError as ke:
-                # print ("KeyError ", ke)
-                pass
+                self.logger.debug(ex)
+
             except Exception as ex:
-                # print ("Error ", ex)
-                pass
+                self.logger.debug(ex)
         no_of_raw_trade = len(self.raw_trades)
         self.logger.info("Total {} raw trades found".format(no_of_raw_trade))
 
     def transform_raw_trade(self, trade):
+        """
+        level 0 : Value of the key is actual valie
+        level 1 : Value of the key maps to other dictrionary. One more lookup
+        Assign values to fields based on if its level 0/1 custom field
+        """
         xtrade = deepcopy(trade)
         l1cfkeys = list(self.l1_customfields.keys())
         for fid, fval in trade.items():
@@ -260,7 +270,13 @@ class TradeCardReader(WekanCardReader):
                 else:
                     xtrade[self.customfields[fid]] = fval
             except KeyError as ke:
+                # self.logger.debug(ke)
                 pass
+            except Exception as ex:
+                self.logger.debug(ex)
+
+        for blk, blv in self.mapped_moved_cards[xtrade["id"]].items():
+            xtrade[self.board_lists[blk]] = blv.strftime("%d/%m/%Y")
         return xtrade
 
     def transform_raw_trades(self):
@@ -280,6 +296,16 @@ class TradeCardReader(WekanCardReader):
                     except KeyError as ke:
                         trade[csv_field] = ""
                         pass
+                trade["Trade Date"] = (
+                    trade["Trade Date"].strftime("%d/%m/%Y")
+                    if trade["Trade Date"]
+                    else ""
+                )
+                trade["Delivery Date"] = (
+                    trade["Delivery Date"].strftime("%d/%m/%Y")
+                    if trade["Delivery Date"]
+                    else ""
+                )
                 card_labels = [self.labels[lid] for lid in raw_trade["labelIds"]]
                 csv_labels = " | "
                 csv_labels = csv_labels.join(card_labels)
@@ -287,10 +313,10 @@ class TradeCardReader(WekanCardReader):
                 # Replace level 2 mapping
                 trades.append(trade)
             except KeyError as ke:
-                pass
+                self.logger.debug(ex)
 
             except Exception as ex:
-                pass
+                self.logger.debug(ex)
         no_of_qurated_trade = len(trades)
         self.logger.info("Total {} qurated trades found".format(no_of_qurated_trade))
         self.trades = trades
