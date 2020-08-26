@@ -16,8 +16,8 @@ class ComplianceCardReader(WekanCardReader):
         self.trades = []
         self.xform_trades = []
         self.csv_card_mapping = {
-            "Client Number": "Client",
-            "Detail": "Detail",
+            "Title": "title",
+            "Created": "createdAt",
             "Labels": "labelIds",
             "For Review": "For Review",
             "For Client Contact": "For Client Contact",
@@ -49,17 +49,21 @@ class ComplianceCardReader(WekanCardReader):
                     except KeyError as ke:
                         raw_trade["labelIds"] = []
 
+                    raw_trade["createdAt"] = card["createdAt"]
+                    raw_trade["title"] = card["title"]
                     matched_dict = match_result.groupdict()
-                    raw_trade["Client"] = matched_dict["client"]
-                    raw_trade["Detail"] = matched_dict["detail"]
+                    # raw_trade["Client"] = matched_dict["clieint"]
+                    # raw_trade["Detail"] = matched_dict["detail"]
                     self.raw_trades.append(raw_trade)
             except KeyError as ke:
-                self.logger.debug(ex)
+                self.logger.debug(ke)
 
             except Exception as ex:
                 self.logger.debug(ex)
         no_of_raw_trade = len(self.raw_trades)
-        self.logger.info("Total {} raw trades found".format(no_of_raw_trade))
+        self.logger.info(
+            "Total {} raw compliance records found".format(no_of_raw_trade)
+        )
 
     def transform_raw_trade(self, trade):
         """
@@ -81,7 +85,7 @@ class ComplianceCardReader(WekanCardReader):
                     pass
                 except Exception as ex:
                     self.logger.debug(ex)
-
+        xtrade["createdAt"] = trade["createdAt"].strftime("%d/%m/%Y")
         try:
             for blk, blv in self.mapped_moved_cards[xtrade["id"]].items():
                 try:
@@ -121,7 +125,9 @@ class ComplianceCardReader(WekanCardReader):
             except Exception as ex:
                 self.logger.debug(ex)
         no_of_qurated_trade = len(trades)
-        self.logger.info("Total {} qurated trades found".format(no_of_qurated_trade))
+        self.logger.info(
+            "Total {} compliance cards qurated".format(no_of_qurated_trade)
+        )
         self.trades = trades
 
     def export_trades(self, ofile):
@@ -130,4 +136,4 @@ class ComplianceCardReader(WekanCardReader):
             trades_csv_writer = csv.DictWriter(trades_csv, keys)
             trades_csv_writer.writeheader()
             trades_csv_writer.writerows(self.trades)
-        self.logger.info("Trade Status exported to file {fn}".format(fn=ofile))
+        self.logger.info("Compliance Status exported to file {fn}".format(fn=ofile))
