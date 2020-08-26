@@ -5,6 +5,7 @@ from gpm_logger import GPMLogger
 from copy import deepcopy
 from wekan_card_reader import WekanCardReader
 
+
 class TradeCardReader(WekanCardReader):
     def __init__(self, board_slug, mh, mp, mdb):
         self.trades = []
@@ -105,7 +106,7 @@ class TradeCardReader(WekanCardReader):
         trades = []
         for raw_trade in self.xform_trades:
             try:
-                trade = self.get_trade_object()
+                trade = deepcopy(self.trade_obj)
                 for (csv_field, card_field) in self.csv_card_mapping.items():
                     try:
                         trade[csv_field] = raw_trade[card_field]
