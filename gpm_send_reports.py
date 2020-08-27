@@ -10,7 +10,7 @@ def trade_report_mailer(recipients, fdt):
     report_file_name = "Trade-Status-Report-{dt}.csv".format(dt=file_date)
     rptm = GPMReportMailer(sender)
     rptm.compose_email(last_working_day, recipients, report_file_name)
-    # rptm.send_mail()
+    rptm.send_mail()
 
 
 def compliance_report_mailer(recipients, fdt):
@@ -44,13 +44,13 @@ if __name__ == "__main__":
         default=file_date,
     )
     parser.add_argument(
-        "-rt", "--report_type", help="Type of report (trade/compliance)", required=True
+        "-rt", "--report", help="Type of report (trade/compliance)", required=True
     )
 
     args = parser.parse_args()
 
     file_date = args.date
-    report_type = args.report_type
+    report_type = args.report
     recipients = args.recipients.split(",")
     if report_type == "trade":
         trade_report_mailer(recipients, file_date)
