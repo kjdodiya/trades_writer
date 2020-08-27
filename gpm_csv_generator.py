@@ -10,8 +10,6 @@ from gpm_logger import GPMLogger
 if __name__ == "__main__":
     logger = GPMLogger("report_generator").get_logger()
 
-
-
     parser = argparse.ArgumentParser(description="Generate csv for compliance cards")
     parser.add_argument(
         "-b",
@@ -25,9 +23,10 @@ if __name__ == "__main__":
     parser.add_argument("-mh", "--mhost", help="MongoDB host", default="localhost")
     parser.add_argument("-mp", "--mport", help="MongoDB port", default=27019)
     parser.add_argument("-d", "--db", help="MongoDB database", default="wekan")
-    parser.add_argument("-rt", "--report", help="Type of report (trade/compliance)", required=True)
+    parser.add_argument(
+        "-rt", "--report", help="Type of report (trade/compliance)", required=True
+    )
     parser.add_argument("-o", "--out", help="File name to export to")
-
 
     args = parser.parse_args()
     board_slug = args.board
@@ -37,18 +36,18 @@ if __name__ == "__main__":
     odir = args.odir
     ofile = args.out
     report = args.report
+    report_title = "{rp}-Status-Report".format(rp=report.capitalize())
 
-    ofile = "{}-{}-{}.csv".format(
-        report.capitalize(), "Status-Report", datetime.now().strftime("%d-%b-%Y")
-        )
+    if not ofile:
+        ofile = "{}-{}.csv".format(report_title, datetime.now().strftime("%d-%b-%Y"))
 
     logger.info("Generating  : {}".format(ofile))
-    
-    if report == 'trade':
+
+    if report == "trade":
         board_slug = "gpm-trades-2020"
         cr = TradeCardReader(board_slug, mongo_host, mongo_port, mongo_db)
 
-    if report == 'compliance':
+    if report == "compliance":
         board_slug = "compliance-work"
         cr = ComplianceCardReader(board_slug, mongo_host, mongo_port, mongo_db)
 
