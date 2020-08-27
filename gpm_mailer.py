@@ -95,3 +95,63 @@ class GPMReportMailer(GPMMailer):
             self.logger.debug(
                 "Could not attach report {rf} {exmsg}", rf=report_file, exmsg=ex
             )
+
+
+class GPMComplianceMailer(GPMMailer):
+    def __init__(self, sender):
+        self.subject_fmt = "Compliance Status Report - {}"
+        self.body_text_fmt = "Dear team,\nPlease find Compliance Status Report for the week ended {}.\nThank you."
+        self.body_html_fmt = "<html><body><p>Dear team,<br><p>Please find Compliance Status Report for the week ended {}.</p><p>Thank you.</p></body></html>"
+        GPMMailer.__init__(self, sender)
+
+    def compose_email(self, time_stamp, receivers, report_file):
+        self.logger.info(
+            "Composing email to send report {rf} for week ending {ts}",
+            rf=report_file,
+            ts=time_stamp,
+        )
+        self.receivers = receivers
+
+        msg = MIMEMultipart()
+        msg["Subject"] = self.subject_fmt.format(time_stamp)
+        msg["From"] = self.sender
+        rcvrs = ","
+        rcvrs = rcvrs.join(receivers)
+        msg["To"] = rcvrs
+        try:
+            message_body = self.body_html_fmt.format(time_stamp)
+            mime_html = MIMEText(message_body, "html")
+            msg.attach(mime_html)
+        except Exception as ex:
+            self.logger.debug(
+                "Could not attach text while sending {rf} {exmsg}",
+                rf=report_file,
+                exmsg=ex,
+            )
+
+        try:
+            self.logger.info(
+                "Trying to attach {rf} for week ending {ts}",
+                rf=report_file,
+                ts=time_stamp,
+            )
+            fp = open(report_file)
+            attachment = MIMEApplication(fp.read(), _subtype="csv")
+            attachment.add_header(
+                "Content-Disposition", "attachment", filename=str(report_file)
+            )
+            msg.attach(attachment)
+            self.mail = msg
+            self.logger.info(
+                "Report file {rf} attached successfully for week ending {ts}",
+                rf=report_file,
+                ts=time_stamp,
+            )
+            self.logger.info(
+                "Email composition to send report for week ening {ts} composed successfully",
+                ts=time_stamp,
+            )
+        except Exception as ex:
+            self.logger.debug(
+                "Could not attach report {rf} {exmsg}", rf=report_file, exmsg=ex
+            )
